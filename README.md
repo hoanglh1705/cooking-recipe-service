@@ -6,7 +6,7 @@ Backend Go cho dự án "Món Ngon Mỗi Ngày". Triển khai theo `architech.md
 
 | Binary | Vai trò |
 |---|---|
-| `cmd/api` | HTTP server (Echo) — `/api/*` cho Next.js, `/admin/*` cho admin panel |
+| `cmd/api` | HTTP server (Echo) — `/api/*` cho Next.js, `/api/admin/*` cho admin panel, `/api/internal/*` cho crawler |
 | `cmd/worker` | Asynq worker chạy 5 stage pipeline AI |
 
 Mọi service dùng chung cấu hình qua biến môi trường (xem `.env.example`).
@@ -20,7 +20,8 @@ cooking-recipe-service/
 │   └── worker/        # Asynq pipeline worker
 ├── internal/
 │   ├── api/           # /api/* — handlers public cho Next.js
-│   ├── admin/         # /admin/* — handlers quản trị (Bearer token)
+│   ├── admin/         # /api/admin/* — handlers quản trị (Bearer token)
+│   ├── internalapi/   # /api/internal/* — handlers crawler (HMAC)
 │   ├── clients/
 │   │   ├── youtube/   # YouTube Data API v3
 │   │   ├── tiktok/    # placeholder (xem mục pháp lý)
@@ -153,7 +154,7 @@ search_videos → download_audio → transcribe_video → compose_recipe → pub
 ```
 
 - `compose_recipe` chỉ chạy khi *tất cả* video của dish có transcript.
-- `publish_recipe` chấm `dishes.status = 'done'`, gọi Next.js revalidate webhook nếu có.
+- `publish_recipe` chấm `dishes.status = 'published'`, gọi Next.js revalidate webhook nếu có.
 - Khi LLM/Whisper API key trống, các client trả về stub deterministic — pipeline vẫn chạy được end-to-end để test.
 
 ## Chạy local
